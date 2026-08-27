@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AINN — AI News Network</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..800&family=Newsreader:ital,opsz,wght@0,6..72,300..700;1,6..72,300..500&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#E7EAEE;
+  --card:#FCFCFB;
+  --ink:#10141A;
+  --mute:#626C79;
+  --rule:#CBD1D9;
+  --rule-soft:#E0E4E9;
+  --signal:#8A1C2B;
+  --signal-tint:#F3E7E8;
+  --pad:clamp(16px,3.2vw,40px);
+  --mono:"IBM Plex Mono",ui-monospace,monospace;
+  --sans:"Archivo",system-ui,sans-serif;
+  --serif:"Newsreader",Georgia,serif;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{
+  margin:0;background:var(--paper);color:var(--ink);
+  font-family:var(--serif);font-optical-sizing:auto;
+  font-size:17px;line-height:1.5;
+}
+a{color:inherit;text-decoration:none}
+:focus-visible{outline:2px solid var(--signal);outline-offset:3px}
+.shell{max-width:1360px;margin:0 auto;background:var(--card);
+  border-left:1px solid var(--rule);border-right:1px solid var(--rule);min-height:100vh}
+
+/* ---------- utility type ---------- */
+.mono{font-family:var(--mono);font-size:10.5px;letter-spacing:.09em;text-transform:uppercase}
+.hed{font-family:var(--sans);font-weight:700;letter-spacing:-.021em;line-height:1.05;margin:0}
+.dek{font-family:var(--serif);color:#333C46;margin:0}
+
+/* ---------- verification marks ---------- */
+.mark{width:9px;height:9px;flex:none;border:1.5px solid var(--ink);display:inline-block}
+.mark--verified{background:var(--ink)}
+.mark--claim{border-color:var(--signal);background:transparent}
+.mark--reported{background:linear-gradient(90deg,var(--ink) 50%,transparent 50%)}
+.mark--unconfirmed{border-style:dashed;border-color:var(--mute)}
+.status{display:inline-flex;align-items:center;gap:7px;color:var(--mute)}
+.status--claim{color:var(--signal)}
+
+/* ---------- ticker ---------- */
+.wirebar{background:var(--ink);color:#E7EAEE;display:flex;align-items:stretch;overflow:hidden}
+.wirebar__tag{font-family:var(--mono);font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;
+  background:var(--signal);color:#fff;padding:9px 14px;display:flex;align-items:center;gap:8px;flex:none}
+.pulse{width:6px;height:6px;border-radius:50%;background:#fff;animation:pulse 2.2s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.25}}
+.wirebar__track{overflow:hidden;flex:1;display:flex;align-items:center}
+.wirebar__run{display:flex;gap:0;white-space:nowrap;animation:run 62s linear infinite}
+.wirebar:hover .wirebar__run{animation-play-state:paused}
+@keyframes run{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+.wireitem{font-family:var(--mono);font-size:11.5px;letter-spacing:.02em;padding:9px 22px;
+  border-right:1px solid #2A313A;text-transform:none}
+.wireitem b{color:#C99AA0;font-weight:500;margin-right:9px;letter-spacing:.08em;text-transform:uppercase;font-size:10px}
+.wirebar__clock{font-family:var(--mono);font-size:10.5px;letter-spacing:.08em;padding:9px 14px;
+  border-left:1px solid #2A313A;color:#8B95A1;flex:none;display:flex;align-items:center}
+
+/* ---------- masthead ---------- */
+.masthead{padding:22px var(--pad) 0;display:flex;align-items:flex-end;gap:24px;flex-wrap:wrap}
+.wordmark{display:flex;align-items:baseline;gap:14px}
+.wordmark__letters{font-family:var(--sans);font-variation-settings:"wdth" 118;font-weight:800;
+  font-size:clamp(44px,7vw,74px);line-height:.8;letter-spacing:-.035em;margin:0}
+.wordmark__letters span{color:var(--signal)}
+.wordmark__sub{border-left:1px solid var(--rule);padding-left:14px;align-self:stretch;
+  display:flex;flex-direction:column;justify-content:flex-end;gap:4px;padding-bottom:2px}
+.wordmark__sub .l1{font-family:var(--sans);font-weight:600;font-size:12px;letter-spacing:.16em;text-transform:uppercase}
+.wordmark__sub .l2{font-family:var(--mono);font-size:10px;letter-spacing:.06em;color:var(--mute);text-transform:uppercase}
+.masthead__meta{margin-left:auto;text-align:right;color:var(--mute);font-family:var(--mono);
+  font-size:10.5px;letter-spacing:.07em;text-transform:uppercase;line-height:1.7}
+.masthead__meta b{color:var(--ink);font-weight:500}
+
+/* ---------- nav ---------- */
+.nav{margin:18px var(--pad) 0;border-top:2px solid var(--ink);border-bottom:1px solid var(--rule);
+  display:flex;align-items:center;gap:2px;overflow-x:auto;scrollbar-width:none}
+.nav::-webkit-scrollbar{display:none}
+.nav a{font-family:var(--sans);font-weight:600;font-size:12.5px;letter-spacing:.05em;text-transform:uppercase;
+  padding:11px 15px;color:var(--ink);white-space:nowrap;border-bottom:2px solid transparent;margin-bottom:-1px}
+.nav a:first-child{padding-left:0}
+.nav a:hover{color:var(--signal);border-bottom-color:var(--signal)}
+.nav a[aria-current]{border-bottom-color:var(--ink)}
+.nav .nav__spacer{margin-left:auto}
+.nav__live{font-family:var(--mono);font-size:10px;letter-spacing:.1em;color:var(--signal);
+  display:flex;align-items:center;gap:7px;padding:11px 0 11px 15px;text-transform:uppercase}
+.nav__live i{width:6px;height:6px;border-radius:50%;background:var(--signal);animation:pulse 2.2s ease-in-out infinite}
+
+/* ---------- top slab: lead + wire ---------- */
+.slab{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:0;margin:0 var(--pad)}
+.lead{padding:28px 34px 30px 0;border-right:1px solid var(--rule)}
+.lead__kicker{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+.lead__section{font-family:var(--mono);font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;
+  color:#fff;background:var(--signal);padding:4px 8px}
+.lead h1{font-size:clamp(34px,4.6vw,58px);font-weight:800;letter-spacing:-.028em;margin:0 0 14px}
+.lead__dek{font-size:20px;line-height:1.42;color:#333C46;max-width:60ch;margin:0 0 18px;font-weight:300}
+.byline{display:flex;flex-wrap:wrap;align-items:center;gap:10px;color:var(--mute);
+  font-family:var(--mono);font-size:10.5px;letter-spacing:.07em;text-transform:uppercase;
+  padding-bottom:20px;border-bottom:1px solid var(--rule-soft)}
+.byline b{color:var(--ink);font-weight:500}
+.byline .dot{width:3px;height:3px;border-radius:50%;background:var(--rule);flex:none}
+
+/* the record ledger — signature element */
+.record{margin-top:22px;border:1px solid var(--rule);border-top:3px solid var(--signal);background:#fff}
+.record__bar{display:flex;align-items:center;justify-content:space-between;gap:12px;
+  padding:9px 14px;border-bottom:1px solid var(--rule-soft)}
+.record__bar h2{font-family:var(--mono);font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;margin:0}
+.record__bar span{font-family:var(--mono);font-size:10px;color:var(--mute);letter-spacing:.05em}
+.record__cols{display:grid;grid-template-columns:1fr 1fr}
+.record__col{padding:14px}
+.record__col + .record__col{border-left:1px solid var(--rule-soft);background:var(--signal-tint)}
+.record__col h3{margin:0 0 11px;font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--mute)}
+.record__col + .record__col h3{color:var(--signal)}
+.record ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px}
+.record li{display:flex;gap:10px;font-size:15px;line-height:1.42;align-items:flex-start}
+.record li .mark{margin-top:6px}
+.record cite{display:block;font-family:var(--mono);font-size:9.5px;font-style:normal;color:var(--mute);
+  letter-spacing:.05em;text-transform:uppercase;margin-top:3px}
+
+/* wire column */
+.wire{padding:28px 0 30px 26px;min-width:0}
+.wire__head{display:flex;align-items:baseline;justify-content:space-between;
+  border-bottom:2px solid var(--ink);padding-bottom:7px;margin-bottom:4px}
+.wire__head h2{font-family:var(--sans);font-weight:700;font-size:15px;letter-spacing:.1em;text-transform:uppercase;margin:0}
+.wire__head span{font-family:var(--mono);font-size:9.5px;color:var(--mute);letter-spacing:.06em}
+.wire__list{list-style:none;margin:0;padding:0}
+.wire__list li{border-bottom:1px solid var(--rule-soft)}
+.wire__list a{display:grid;grid-template-columns:46px 1fr;gap:10px;padding:11px 4px 11px 0;align-items:start}
+.wire__list a:hover{background:#F3F4F2}
+.wire__list a:hover .wire__t{color:var(--signal)}
+.wire__time{font-family:var(--mono);font-size:10px;color:var(--mute);letter-spacing:.03em;padding-top:3px}
+.wire__t{font-family:var(--sans);font-weight:600;font-size:14.5px;line-height:1.26;letter-spacing:-.008em;margin:0 0 5px}
+.wire__list .status{font-family:var(--mono);font-size:9.5px;letter-spacing:.08em;text-transform:uppercase}
+.wire__more{display:block;text-align:center;font-family:var(--mono);font-size:10px;letter-spacing:.12em;
+  text-transform:uppercase;padding:12px;border:1px solid var(--rule);margin-top:14px;color:var(--mute)}
+.wire__more:hover{border-color:var(--ink);color:var(--ink)}
+
+/* ---------- claim check table ---------- */
+.check{margin:34px var(--pad) 0;border-top:2px solid var(--ink);padding-top:16px}
+.check__head{display:flex;align-items:flex-end;justify-content:space-between;gap:20px;flex-wrap:wrap;margin-bottom:14px}
+.check__head h2{font-family:var(--sans);font-weight:700;font-size:19px;letter-spacing:.02em;margin:0}
+.check__head h2 em{font-style:normal;color:var(--signal)}
+.check__head p{margin:5px 0 0;font-size:15px;color:var(--mute);max-width:62ch}
+.check__stamp{font-family:var(--mono);font-size:10px;letter-spacing:.07em;text-transform:uppercase;
+  color:var(--mute);border:1px solid var(--rule);padding:7px 10px;text-align:right;line-height:1.6}
+table.bench{width:100%;border-collapse:collapse;font-family:var(--mono);font-size:12.5px}
+table.bench th{text-align:left;font-weight:500;font-size:9.5px;letter-spacing:.11em;text-transform:uppercase;
+  color:var(--mute);padding:0 10px 8px 0;border-bottom:1px solid var(--rule)}
+table.bench td{padding:11px 10px 11px 0;border-bottom:1px solid var(--rule-soft);vertical-align:baseline}
+table.bench td:first-child{font-family:var(--sans);font-weight:600;font-size:14px;letter-spacing:-.005em}
+table.bench .num{text-align:right;width:15%;white-space:nowrap}
+table.bench .delta{text-align:right;width:13%;color:var(--signal);font-weight:600;white-space:nowrap}
+table.bench .delta.ok{color:var(--mute);font-weight:400}
+table.bench .note{width:26%;color:var(--mute);font-size:11px;line-height:1.5}
+table.bench tr:hover td{background:#F3F4F2}
+
+/* ---------- filter + grid ---------- */
+.stream{margin:38px var(--pad) 0}
+.stream__bar{display:flex;align-items:center;gap:14px;flex-wrap:wrap;
+  border-top:2px solid var(--ink);border-bottom:1px solid var(--rule);padding:10px 0}
+.stream__bar h2{font-family:var(--sans);font-weight:700;font-size:15px;letter-spacing:.1em;text-transform:uppercase;margin:0}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin-left:auto}
+.chip{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;
+  padding:6px 11px;border:1px solid var(--rule);background:transparent;color:var(--mute);cursor:pointer}
+.chip:hover{border-color:var(--ink);color:var(--ink)}
+.chip[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);color:#fff}
+.grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:0}
+.card{padding:20px 22px 22px 0;border-right:1px solid var(--rule-soft);border-bottom:1px solid var(--rule-soft);display:block}
+.card:nth-child(3n){border-right:none;padding-right:0}
+.card:nth-child(3n+1){padding-left:0}
+.card:not(:nth-child(3n)):not(:nth-child(3n+1)){padding-left:22px}
+.card:hover h3{color:var(--signal)}
+.card__kicker{font-family:var(--mono);font-size:9.5px;letter-spacing:.13em;text-transform:uppercase;
+  color:var(--signal);margin-bottom:9px;display:block}
+.card h3{font-family:var(--sans);font-weight:700;font-size:19px;line-height:1.16;letter-spacing:-.015em;margin:0 0 8px}
+.card p{margin:0 0 13px;font-size:15px;line-height:1.45;color:#3B444E}
+.card__foot{display:flex;align-items:center;gap:10px;flex-wrap:wrap;
+  font-family:var(--mono);font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--mute)}
+.card.is-hidden{display:none}
+
+/* ---------- standards / legend ---------- */
+.standards{margin:40px var(--pad) 0;background:var(--ink);color:#DDE1E6;padding:26px 30px}
+.standards__top{display:flex;gap:26px;align-items:flex-start;flex-wrap:wrap;
+  border-bottom:1px solid #2A313A;padding-bottom:20px;margin-bottom:20px}
+.standards h2{font-family:var(--sans);font-weight:700;font-size:17px;letter-spacing:.05em;
+  text-transform:uppercase;margin:0 0 7px;color:#fff}
+.standards__top p{margin:0;font-size:15px;line-height:1.5;max-width:52ch;color:#A8B1BB}
+.legend{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:20px;flex:1;min-width:280px}
+.legend div{border-top:1px solid #2A313A;padding-top:11px}
+.legend .status{color:#fff;font-family:var(--mono);font-size:10px;letter-spacing:.09em;text-transform:uppercase;margin-bottom:7px}
+.legend .mark{border-color:#fff}
+.legend .mark--verified{background:#fff}
+.legend .mark--claim{border-color:#D08A93;background:transparent}
+.legend .mark--reported{background:linear-gradient(90deg,#fff 50%,transparent 50%)}
+.legend .mark--unconfirmed{border-color:#8B95A1;border-style:dashed}
+.legend p{margin:0;font-size:13px;line-height:1.5;color:#8B95A1;font-family:var(--serif)}
+
+/* ---------- footer ---------- */
+.foot{margin:0 var(--pad);padding:24px 0 46px;display:flex;gap:20px;flex-wrap:wrap;
+  align-items:center;justify-content:space-between;
+  font-family:var(--mono);font-size:10px;letter-spacing:.07em;text-transform:uppercase;color:var(--mute)}
+.foot__links{display:flex;gap:18px;flex-wrap:wrap}
+.foot__links a:hover{color:var(--signal)}
+
+/* ---------- responsive ---------- */
+@media (max-width:1040px){
+  .slab{grid-template-columns:1fr}
+  .lead{border-right:none;padding-right:0;padding-bottom:24px;border-bottom:1px solid var(--rule)}
+  .wire{padding-left:0}
+  .grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .card:nth-child(3n){border-right:1px solid var(--rule-soft);padding-right:22px}
+  .card:nth-child(3n+1){padding-left:22px}
+  .card:nth-child(2n){border-right:none;padding-right:0}
+  .card:nth-child(2n+1){padding-left:0}
+  .legend{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media (max-width:680px){
+  body{font-size:16px}
+  .shell{border:none}
+  .masthead__meta{margin-left:0;text-align:left;width:100%}
+  .record__cols{grid-template-columns:1fr}
+  .record__col + .record__col{border-left:none;border-top:1px solid var(--rule-soft)}
+  .grid{grid-template-columns:1fr}
+  .card{border-right:none!important;padding:18px 0!important}
+  table.bench .note{display:none}
+  .check__stamp{text-align:left}
+  .legend{grid-template-columns:1fr}
+}
+@media (prefers-reduced-motion:reduce){
+  .wirebar__run{animation:none}
+  .wirebar__track{overflow-x:auto}
+  .pulse,.nav__live i{animation:none}
+  *{transition:none!important}
+}
+</style>
+</head>
+<body>
+<div class="shell">
+
+  <!-- ===== live wire ticker ===== -->
+  <div class="wirebar">
+    <div class="wirebar__tag"><span class="pulse"></span>On the wire</div>
+    <div class="wirebar__track">
+      <div class="wirebar__run" id="run">
+        <span class="wireitem"><b>09:41</b>Kestrel Labs pauses Meridian-3 API signups, cites capacity</span>
+        <span class="wireitem"><b>09:12</b>Second retest confirms 11-point gap on agentic coding suite</span>
+        <span class="wireitem"><b>08:55</b>Northgate files for 400MW grid connection in Ohio</span>
+        <span class="wireitem"><b>08:30</b>EU consultation on frontier disclosure closes Friday</span>
+        <span class="wireitem"><b>07:48</b>Halcyon researchers publish interpretability replication</span>
+        <span class="wireitem"><b>07:02</b>Chip export licence backlog now averaging 94 days</span>
+      </div>
+    </div>
+    <div class="wirebar__clock" id="clock">--:--:-- UTC</div>
+  </div>
+
+  <!-- ===== masthead ===== -->
+  <header class="masthead">
+    <div class="wordmark">
+      <p class="wordmark__letters"><span>AI</span>NN</p>
+      <div class="wordmark__sub">
+        <div class="l1">AI News Network</div>
+        <div class="l2">A wire service for machine intelligence</div>
+      </div>
+    </div>
+    <div class="masthead__meta">
+      <div>Thursday, 27 August 2026</div>
+      <div><b>412</b> stories logged this week</div>
+      <div><b>31</b> claims independently retested</div>
+    </div>
+  </header>
+
+  <nav class="nav" aria-label="Sections">
+    <a href="#" aria-current="page">Top</a>
+    <a href="#">Models</a>
+    <a href="#">Research</a>
+    <a href="#">Policy</a>
+    <a href="#">Compute</a>
+    <a href="#">Business</a>
+    <a href="#">Safety</a>
+    <a href="#">Benchmarks</a>
+    <span class="nav__spacer"></span>
+    <span class="nav__live"><i></i>3 stories developing</span>
+  </nav>
+
+  <!-- ===== lead + wire ===== -->
+  <div class="slab">
+    <article class="lead">
+      <div class="lead__kicker">
+        <span class="lead__section">Models</span>
+        <span class="status status--claim mono"><span class="mark mark--claim"></span>Company claim — partly verified</span>
+      </div>
+      <h1 class="hed">Kestrel says Meridian-3 runs a full workday unsupervised. We gave it eight hours.</h1>
+      <p class="lead__dek">The lab's launch post describes an agent that completes multi-day engineering tasks without a human in the loop. In our own testing it held for just under four hours before it needed one.</p>
+      <div class="byline">
+        <span>By <b>Tessa Iwuoha</b> and <b>Daniel Reyes-Kim</b></span>
+        <span class="dot"></span><span>Updated 09:20 UTC</span>
+        <span class="dot"></span><span>9 min read</span>
+        <span class="dot"></span><span><b>4</b> sources</span>
+      </div>
+
+      <section class="record" aria-label="What we can and cannot confirm">
+        <div class="record__bar">
+          <h2>The record</h2>
+          <span>Updated as reporting develops</span>
+        </div>
+        <div class="record__cols">
+          <div class="record__col">
+            <h3>Confirmed by AINN</h3>
+            <ul>
+              <li><span class="mark mark--verified"></span><div>Meridian-3 is live for enterprise customers as of 06:00 UTC today.<cite>Verified — API access, two customers</cite></div></li>
+              <li><span class="mark mark--verified"></span><div>Pricing is $9 per million input tokens, up 40% on Meridian-2.<cite>Verified — published rate card</cite></div></li>
+              <li><span class="mark mark--verified"></span><div>The model ran 3h 51m on our internal migration task before failing.<cite>Verified — AINN test, method published</cite></div></li>
+            </ul>
+          </div>
+          <div class="record__col">
+            <h3>Claimed, not yet verified</h3>
+            <ul>
+              <li><span class="mark mark--claim"></span><div>"Full workday" autonomy of 8+ hours on real engineering work.<cite>Kestrel launch post — no method given</cite></div></li>
+              <li><span class="mark mark--claim"></span><div>A 71.4% score on the agentic coding suite.<cite>Lab self-reported — see retest below</cite></div></li>
+              <li><span class="mark mark--unconfirmed"></span><div>Training finished in March on a new Northgate cluster.<cite>Single anonymous source — unconfirmed</cite></div></li>
+            </ul>
+          </div>
+        </div>
+      </section>
+    </article>
+
+    <aside class="wire">
+      <div class="wire__head">
+        <h2>The wire</h2>
+        <span>All times UTC</span>
+      </div>
+      <ul class="wire__list">
+        <li><a href="#">
+          <span class="wire__time">09:41</span>
+          <span>
+            <h3 class="wire__t">Kestrel pauses new Meridian-3 signups four hours after launch</h3>
+            <span class="status"><span class="mark mark--verified"></span>Verified</span>
+          </span>
+        </a></li>
+        <li><a href="#">
+          <span class="wire__time">08:55</span>
+          <span>
+            <h3 class="wire__t">Northgate seeks 400MW grid connection for Ohio datacentre</h3>
+            <span class="status"><span class="mark mark--verified"></span>Verified — filing</span>
+          </span>
+        </a></li>
+        <li><a href="#">
+          <span class="wire__time">08:30</span>
+          <span>
+            <h3 class="wire__t">Frontier disclosure consultation closes Friday with 900 submissions</h3>
+            <span class="status"><span class="mark mark--verified"></span>Verified</span>
+          </span>
+        </a></li>
+        <li><a href="#">
+          <span class="wire__time">07:48</span>
+          <span>
+            <h3 class="wire__t">Third lab replicates Halcyon's feature-steering result</h3>
+            <span class="status"><span class="mark mark--reported"></span>Reported — preprint</span>
+          </span>
+        </a></li>
+        <li><a href="#">
+          <span class="wire__time">07:02</span>
+          <span>
+            <h3 class="wire__t">Export licence backlog stretches to 94 days, brokers say</h3>
+            <span class="status"><span class="mark mark--reported"></span>Reported</span>
+          </span>
+        </a></li>
+        <li><a href="#">
+          <span class="wire__time">06:15</span>
+          <span>
+            <h3 class="wire__t">Two Kestrel safety staff said to have left before launch</h3>
+            <span class="status"><span class="mark mark--unconfirmed"></span>Unconfirmed</span>
+          </span>
+        </a></li>
+        <li><a href="#">
+          <span class="wire__time">05:30</span>
+          <span>
+            <h3 class="wire__t">Atlas 4 weights appear on a mirror site; provenance unclear</h3>
+            <span class="status"><span class="mark mark--unconfirmed"></span>Unconfirmed</span>
+          </span>
+        </a></li>
+      </ul>
+      <a class="wire__more" href="#">Open full wire — 84 today</a>
+    </aside>
+  </div>
+
+  <!-- ===== claim check ===== -->
+  <section class="check">
+    <div class="check__head">
+      <div>
+        <h2>Claim check: <em>Meridian-3 agentic benchmarks</em></h2>
+        <p>Kestrel published four numbers with its launch. We ran the same public suites on the production API, ten passes each, no scaffolding beyond the lab's own harness.</p>
+      </div>
+      <div class="check__stamp">
+        Tested 26–27 Aug<br>10 passes per suite<br><a href="#" style="color:var(--signal)">Method and logs →</a>
+      </div>
+    </div>
+    <table class="bench">
+      <thead>
+        <tr>
+          <th>Benchmark</th>
+          <th class="num">Kestrel</th>
+          <th class="num">AINN retest</th>
+          <th class="delta">Δ</th>
+          <th class="note">Note</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Agentic coding suite</td>
+          <td class="num">71.4%</td>
+          <td class="num">60.2%</td>
+          <td class="delta">−11.2</td>
+          <td class="note">Gap closes to −3.1 with the lab's retry-on-failure setting enabled, which is off by default.</td>
+        </tr>
+        <tr>
+          <td>Long-horizon task completion</td>
+          <td class="num">8h 06m</td>
+          <td class="num">3h 51m</td>
+          <td class="delta">−52%</td>
+          <td class="note">Kestrel's figure counts runs where a human restarted a stalled step. Ours does not.</td>
+        </tr>
+        <tr>
+          <td>Tool-use accuracy</td>
+          <td class="num">94.1%</td>
+          <td class="num">93.6%</td>
+          <td class="delta ok">−0.5</td>
+          <td class="note">Within run-to-run variance. Claim holds.</td>
+        </tr>
+        <tr>
+          <td>Context retrieval @ 1M</td>
+          <td class="num">99.2%</td>
+          <td class="num">98.8%</td>
+          <td class="delta ok">−0.4</td>
+          <td class="note">Within variance. Claim holds.</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- ===== stream ===== -->
+  <section class="stream">
+    <div class="stream__bar">
+      <h2>Today</h2>
+      <div class="chips" role="group" aria-label="Filter stories by section">
+        <button class="chip" aria-pressed="true" data-cat="all">All</button>
+        <button class="chip" aria-pressed="false" data-cat="models">Models</button>
+        <button class="chip" aria-pressed="false" data-cat="policy">Policy</button>
+        <button class="chip" aria-pressed="false" data-cat="compute">Compute</button>
+        <button class="chip" aria-pressed="false" data-cat="research">Research</button>
+        <button class="chip" aria-pressed="false" data-cat="business">Business</button>
+      </div>
+    </div>
+    <div class="grid" id="grid">
+
+      <a class="card" href="#" data-cat="policy">
+        <span class="card__kicker">Policy</span>
+        <h3>Regulators want training data receipts. Nobody kept them.</h3>
+        <p>Draft rules would require labs to log dataset provenance from 2027. Four of six large labs told us their pre-2024 records are incomplete.</p>
+        <span class="card__foot"><span class="status"><span class="mark mark--reported"></span>Reported</span> · 2h ago · 7 min</span>
+      </a>
+
+      <a class="card" href="#" data-cat="compute">
+        <span class="card__kicker">Compute</span>
+        <h3>The quiet economics of a datacentre that can't get power</h3>
+        <p>Northgate's Ohio site has racks, cooling and no grid connection until 2029. It is now renting capacity from the operator it planned to replace.</p>
+        <span class="card__foot"><span class="status"><span class="mark mark--verified"></span>Verified</span> · 4h ago · 11 min</span>
+      </a>
+
+      <a class="card" href="#" data-cat="research">
+        <span class="card__kicker">Research</span>
+        <h3>A replication that actually replicated</h3>
+        <p>Three independent groups reproduced Halcyon's steering result within 2% . We walk through what the method does and where it still breaks.</p>
+        <span class="card__foot"><span class="status"><span class="mark mark--verified"></span>Verified — 3 labs</span> · 5h ago · 8 min</span>
+      </a>
+
+      <a class="card" href="#" data-cat="business">
+        <span class="card__kicker">Business</span>
+        <h3>Enterprise buyers are quietly renegotiating their 2025 contracts</h3>
+        <p>Falling inference prices left large customers locked into rates 3× the market. Six procurement leads described the same conversation.</p>
+        <span class="card__foot"><span class="status"><span class="mark mark--reported"></span>Reported — 6 sources</span> · 6h ago · 9 min</span>
+      </a>
+
+      <a class="card" href="#" data-cat="models">
+        <span class="card__kicker">Models</span>
+        <h3>Atlas 4 weights are circulating. Nobody will say from where.</h3>
+        <p>Files matching Atlas 4's architecture appeared on a mirror overnight. We could not verify provenance and are not linking to them.</p>
+        <span class="card__foot"><span class="status"><span class="mark mark--unconfirmed"></span>Unconfirmed</span> · 7h ago · 4 min</span>
+      </a>
+
+      <a class="card" href="#" data-cat="policy">
+        <span class="card__kicker">Policy</span>
+        <h3>What the disclosure consultation actually asks for</h3>
+        <p>Nine questions, one of which would make evaluation results public before release. A plain reading of the text, and who filed against it.</p>
+        <span class="card__foot"><span class="status"><span class="mark mark--verified"></span>Verified — document</span> · 9h ago · 6 min</span>
+      </a>
+
+      <a class="card" href="#" data-cat="research">
+        <span class="card__kicker">Research</span>
+        <h3>Why every lab's eval numbers went up at once</h3>
+        <p>Four benchmarks were revised in June. The revisions are defensible; comparing pre- and post-June scores is not.</p>
+        <span class="card__foot"><span class="status"><span class="mark mark--verified"></span>Verified</span> · 11h ago · 10 min</span>
+      </a>
+
+      <a class="card" href="#" data-cat="compute">
+        <span class="card__kicker">Compute</span>
+        <h3>Export licences are taking 94 days. Two years ago it was 30.</h3>
+        <p>Brokers describe a backlog that has reshaped how mid-size labs plan hardware. Officials declined to give figures.</p>
+        <span class="card__foot"><span class="status"><span class="mark mark--reported"></span>Reported</span> · 13h ago · 7 min</span>
+      </a>
+
+      <a class="card" href="#" data-cat="business">
+        <span class="card__kicker">Business</span>
+        <h3>The AI startup that gave up on its own model</h3>
+        <p>After 18 months and $40m, Vantis switched to an off-the-shelf API. Its founders explain the maths that changed their minds.</p>
+        <span class="card__foot"><span class="status"><span class="mark mark--verified"></span>Verified — on record</span> · 15h ago · 12 min</span>
+      </a>
+
+    </div>
+  </section>
+
+  <!-- ===== standards ===== -->
+  <section class="standards">
+    <div class="standards__top">
+      <div style="min-width:240px;flex:0 0 auto">
+        <h2>How we label stories</h2>
+        <p>Every AINN story carries a mark showing how much of it we can stand behind. The mark is set by an editor, not the writer, and it changes as reporting changes.</p>
+      </div>
+      <div class="legend">
+        <div>
+          <span class="status"><span class="mark mark--verified"></span>Verified</span>
+          <p>AINN saw the document, ran the test, or confirmed it with two independent sources.</p>
+        </div>
+        <div>
+          <span class="status"><span class="mark mark--claim"></span>Company claim</span>
+          <p>A lab or vendor says so. We have not been able to test it ourselves yet.</p>
+        </div>
+        <div>
+          <span class="status"><span class="mark mark--reported"></span>Reported</span>
+          <p>Sourced to named people or a credible outlet, but not independently confirmed by us.</p>
+        </div>
+        <div>
+          <span class="status"><span class="mark mark--unconfirmed"></span>Unconfirmed</span>
+          <p>We are publishing because it matters and it is circulating. Treat it as unsettled.</p>
+        </div>
+      </div>
+    </div>
+    <p style="margin:0;font-family:var(--mono);font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:#8B95A1">
+      Corrections are logged in full and never quietly edited · <a href="#" style="color:#D08A93">Read our testing method</a> · <a href="#" style="color:#D08A93">Ownership and funding</a>
+    </p>
+  </section>
+
+  <footer class="foot">
+    <div>© 2026 AI News Network · Independent · No lab funding</div>
+    <div class="foot__links">
+      <a href="#">Newsletter</a>
+      <a href="#">RSS</a>
+      <a href="#">Corrections</a>
+      <a href="#">Contact a reporter securely</a>
+      <a href="#">Standards</a>
+    </div>
+  </footer>
+
+</div>
+
+<script>
+// live UTC clock in the wire bar
+(function(){
+  var el = document.getElementById('clock');
+  function tick(){
+    var d = new Date();
+    var p = function(n){ return String(n).padStart(2,'0'); };
+    el.textContent = p(d.getUTCHours())+':'+p(d.getUTCMinutes())+':'+p(d.getUTCSeconds())+' UTC';
+  }
+  tick(); setInterval(tick, 1000);
+})();
+
+// seamless ticker: duplicate the run once so the -50% loop is continuous
+(function(){
+  var run = document.getElementById('run');
+  run.innerHTML += run.innerHTML;
+})();
+
+// section filter
+(function(){
+  var chips = document.querySelectorAll('.chip');
+  var cards = document.querySelectorAll('#grid .card');
+  chips.forEach(function(chip){
+    chip.addEventListener('click', function(){
+      var cat = chip.dataset.cat;
+      chips.forEach(function(c){ c.setAttribute('aria-pressed', String(c === chip)); });
+      cards.forEach(function(card){
+        card.classList.toggle('is-hidden', cat !== 'all' && card.dataset.cat !== cat);
+      });
+    });
+  });
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,83 @@
+@import "tailwindcss";
+
+/* ==========================================================================
+   AINN Design System Tokens
+   Maps the design system (docs/design/ainn.css) into Tailwind's layer.
+   ========================================================================== */
+
+@layer base {
+  :root {
+    /* Colour — from ainn.css */
+    --paper: #E7EAEE;
+    --card: #FCFCFB;
+    --ink: #10141A;
+    --mute: #626C79;
+    --rule: #CBD1D9;
+    --rule-soft: #E0E4E9;
+    --signal: #8A1C2B;
+    --signal-tint: #F3E7E8;
+    --signal-lift: #D08A93;
+
+    /* Typography */
+    --sans: "Archivo", system-ui, sans-serif;
+    --serif: "Newsreader", Georgia, serif;
+    --mono: "IBM Plex Mono", ui-monospace, monospace;
+
+    /* Spacing — 4px base */
+    --s1: 4px;
+    --s2: 8px;
+    --s3: 12px;
+    --s4: 16px;
+    --s5: 22px;
+    --s6: 30px;
+    --s7: 40px;
+    --s8: 56px;
+    --pad: clamp(16px, 3.2vw, 40px);
+    --measure: 70ch;
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--serif);
+    font-optical-sizing: auto;
+    font-size: 17px;
+    line-height: 1.5;
+  }
+
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--signal);
+    outline-offset: 3px;
+  }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--rule); border-radius: 10px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--mute); }
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation: none !important;
+    transition: none !important;
+  }
+  html {
+    scroll-behavior: auto;
+  }
+}

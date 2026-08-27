@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kestrel says Meridian-3 runs a full workday unsupervised. We gave it eight hours. — AINN</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..800&family=Newsreader:ital,opsz,wght@0,6..72,300..700;1,6..72,300..500&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#E7EAEE;
+  --card:#FCFCFB;
+  --ink:#10141A;
+  --mute:#626C79;
+  --rule:#CBD1D9;
+  --rule-soft:#E0E4E9;
+  --signal:#8A1C2B;
+  --signal-tint:#F3E7E8;
+  --pad:clamp(16px,3.2vw,40px);
+  --mono:"IBM Plex Mono",ui-monospace,monospace;
+  --sans:"Archivo",system-ui,sans-serif;
+  --serif:"Newsreader",Georgia,serif;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%;scroll-behavior:smooth}
+body{margin:0;background:var(--paper);color:var(--ink);
+  font-family:var(--serif);font-optical-sizing:auto;font-size:17px;line-height:1.5}
+a{color:inherit;text-decoration:none}
+:focus-visible{outline:2px solid var(--signal);outline-offset:3px}
+.shell{max-width:1360px;margin:0 auto;background:var(--card);
+  border-left:1px solid var(--rule);border-right:1px solid var(--rule)}
+
+/* ---------- shared marks ---------- */
+.mark{width:9px;height:9px;flex:none;border:1.5px solid var(--ink);display:inline-block}
+.mark--verified{background:var(--ink)}
+.mark--claim{border-color:var(--signal);background:transparent}
+.mark--reported{background:linear-gradient(90deg,var(--ink) 50%,transparent 50%)}
+.mark--unconfirmed{border-style:dashed;border-color:var(--mute)}
+.status{display:inline-flex;align-items:center;gap:7px;color:var(--mute);
+  font-family:var(--mono);font-size:10px;letter-spacing:.09em;text-transform:uppercase}
+.status--claim{color:var(--signal)}
+
+/* ---------- wire bar ---------- */
+.wirebar{background:var(--ink);color:#E7EAEE;display:flex;align-items:stretch;overflow:hidden}
+.wirebar__tag{font-family:var(--mono);font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;
+  background:var(--signal);color:#fff;padding:9px 14px;display:flex;align-items:center;gap:8px;flex:none}
+.pulse{width:6px;height:6px;border-radius:50%;background:#fff;animation:pulse 2.2s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.25}}
+.wirebar__track{overflow:hidden;flex:1;display:flex;align-items:center}
+.wirebar__run{display:flex;white-space:nowrap;animation:run 62s linear infinite}
+.wirebar:hover .wirebar__run{animation-play-state:paused}
+@keyframes run{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+.wireitem{font-family:var(--mono);font-size:11.5px;padding:9px 22px;border-right:1px solid #2A313A}
+.wireitem b{color:#C99AA0;font-weight:500;margin-right:9px;letter-spacing:.08em;text-transform:uppercase;font-size:10px}
+.wirebar__clock{font-family:var(--mono);font-size:10.5px;letter-spacing:.08em;padding:9px 14px;
+  border-left:1px solid #2A313A;color:#8B95A1;flex:none;display:flex;align-items:center}
+
+/* ---------- compact masthead ---------- */
+.topbar{display:flex;align-items:center;gap:18px;padding:14px var(--pad);border-bottom:1px solid var(--rule)}
+.wordmark{display:flex;align-items:baseline;gap:11px}
+.wordmark__letters{font-family:var(--sans);font-variation-settings:"wdth" 118;font-weight:800;
+  font-size:30px;line-height:.8;letter-spacing:-.035em;margin:0}
+.wordmark__letters span{color:var(--signal)}
+.wordmark__sub{font-family:var(--mono);font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--mute);border-left:1px solid var(--rule);padding-left:11px}
+.topnav{display:flex;gap:2px;margin-left:8px;overflow-x:auto;scrollbar-width:none}
+.topnav::-webkit-scrollbar{display:none}
+.topnav a{font-family:var(--sans);font-weight:600;font-size:12px;letter-spacing:.05em;text-transform:uppercase;
+  padding:6px 11px;white-space:nowrap;border-bottom:2px solid transparent}
+.topnav a:hover{color:var(--signal);border-bottom-color:var(--signal)}
+.topnav a[aria-current]{border-bottom-color:var(--ink)}
+.topbar__end{margin-left:auto;display:flex;align-items:center;gap:14px;flex:none}
+.btn-follow{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;
+  border:1px solid var(--ink);padding:7px 12px;background:transparent;color:var(--ink);cursor:pointer}
+.btn-follow:hover{background:var(--ink);color:#fff}
+
+/* reading progress */
+.progress{position:sticky;top:0;height:3px;background:var(--rule-soft);z-index:40}
+.progress i{display:block;height:100%;width:0;background:var(--signal)}
+
+/* ---------- headline block ---------- */
+.head{padding:34px var(--pad) 0;max-width:1000px}
+.head__kicker{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:16px}
+.head__section{font-family:var(--mono);font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;
+  color:#fff;background:var(--signal);padding:4px 8px}
+.head h1{font-family:var(--sans);font-weight:800;font-size:clamp(32px,4.6vw,56px);
+  line-height:1.03;letter-spacing:-.03em;margin:0 0 16px}
+.head__dek{font-size:21px;line-height:1.42;font-weight:300;color:#333C46;max-width:56ch;margin:0 0 20px}
+.byline{display:flex;flex-wrap:wrap;align-items:center;gap:10px;color:var(--mute);
+  font-family:var(--mono);font-size:10.5px;letter-spacing:.07em;text-transform:uppercase;
+  padding-bottom:18px;border-bottom:1px solid var(--rule)}
+.byline b{color:var(--ink);font-weight:500}
+.byline a{color:var(--signal)}
+.byline .dot{width:3px;height:3px;border-radius:50%;background:var(--rule);flex:none}
+
+/* ---------- record ledger ---------- */
+.record{margin:24px 0 0;border:1px solid var(--rule);border-top:3px solid var(--signal);background:#fff}
+.record__bar{display:flex;align-items:center;justify-content:space-between;gap:12px;
+  padding:9px 14px;border-bottom:1px solid var(--rule-soft)}
+.record__bar h2{font-family:var(--mono);font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;margin:0}
+.record__bar span{font-family:var(--mono);font-size:10px;color:var(--mute)}
+.record__cols{display:grid;grid-template-columns:1fr 1fr}
+.record__col{padding:14px}
+.record__col + .record__col{border-left:1px solid var(--rule-soft);background:var(--signal-tint)}
+.record__col h3{margin:0 0 11px;font-family:var(--mono);font-size:10px;letter-spacing:.12em;
+  text-transform:uppercase;color:var(--mute)}
+.record__col + .record__col h3{color:var(--signal)}
+.record ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px}
+.record li{display:flex;gap:10px;font-size:15px;line-height:1.42;align-items:flex-start}
+.record li .mark{margin-top:6px}
+.record cite{display:block;font-family:var(--mono);font-size:9.5px;font-style:normal;color:var(--mute);
+  letter-spacing:.05em;text-transform:uppercase;margin-top:3px}
+
+/* ---------- body layout ---------- */
+.piece{display:grid;grid-template-columns:200px minmax(0,1fr) 300px;gap:0;
+  margin:0 var(--pad);padding-top:30px;align-items:start}
+
+/* left rail */
+.rail{position:sticky;top:26px;padding-right:26px;border-right:1px solid var(--rule-soft)}
+.rail__block{margin-bottom:22px}
+.rail__block h4{font-family:var(--mono);font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;
+  color:var(--mute);margin:0 0 8px;padding-bottom:6px;border-bottom:1px solid var(--rule-soft)}
+.rail__val{font-family:var(--sans);font-weight:600;font-size:14px;line-height:1.3}
+.rail__sub{font-family:var(--mono);font-size:10px;color:var(--mute);letter-spacing:.04em;margin-top:4px}
+.rail__actions{display:flex;flex-direction:column;gap:6px}
+.rail__actions a{font-family:var(--mono);font-size:10px;letter-spacing:.09em;text-transform:uppercase;
+  border:1px solid var(--rule);padding:8px 10px;color:var(--mute);text-align:center}
+.rail__actions a:hover{border-color:var(--ink);color:var(--ink)}
+
+/* article body */
+.body{padding:0 34px;max-width:70ch}
+.body > p{margin:0 0 20px;font-size:19px;line-height:1.62}
+.body > p:first-of-type{font-size:20px}
+.body > p:first-of-type::first-letter{font-family:var(--sans);font-weight:800;font-size:56px;
+  float:left;line-height:.78;margin:5px 10px 0 0;color:var(--signal)}
+.body h2{font-family:var(--sans);font-weight:700;font-size:22px;letter-spacing:-.015em;
+  margin:36px 0 14px;padding-top:16px;border-top:1px solid var(--rule-soft)}
+.body a.link{color:var(--signal);border-bottom:1px solid rgba(138,28,43,.35)}
+.body a.link:hover{border-bottom-color:var(--signal)}
+.body strong{font-weight:600}
+
+/* inline annotation — a claim being marked mid-sentence */
+.claimtag{display:inline-flex;align-items:center;gap:5px;font-family:var(--mono);font-size:9.5px;
+  letter-spacing:.08em;text-transform:uppercase;color:var(--signal);vertical-align:2px;
+  border:1px solid rgba(138,28,43,.3);padding:1px 5px;margin-left:4px;white-space:nowrap}
+
+blockquote{margin:28px 0;padding:0 0 0 20px;border-left:3px solid var(--signal)}
+blockquote p{font-family:var(--sans);font-weight:600;font-size:23px;line-height:1.24;
+  letter-spacing:-.018em;margin:0 0 10px}
+blockquote footer{font-family:var(--mono);font-size:10px;letter-spacing:.08em;
+  text-transform:uppercase;color:var(--mute)}
+
+/* inline claim-check table */
+.check{margin:30px 0;border-top:2px solid var(--ink);padding-top:14px}
+.check__head{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:12px}
+.check__head h3{font-family:var(--sans);font-weight:700;font-size:16px;margin:0;letter-spacing:.02em}
+.check__head span{font-family:var(--mono);font-size:9.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--mute)}
+table.bench{width:100%;border-collapse:collapse;font-family:var(--mono);font-size:12px}
+table.bench th{text-align:left;font-weight:500;font-size:9.5px;letter-spacing:.11em;text-transform:uppercase;
+  color:var(--mute);padding:0 8px 8px 0;border-bottom:1px solid var(--rule)}
+table.bench td{padding:10px 8px 10px 0;border-bottom:1px solid var(--rule-soft);vertical-align:baseline}
+table.bench td:first-child{font-family:var(--sans);font-weight:600;font-size:13.5px}
+table.bench .num{text-align:right;width:17%;white-space:nowrap}
+table.bench .delta{text-align:right;width:15%;color:var(--signal);font-weight:600;white-space:nowrap}
+table.bench .delta.ok{color:var(--mute);font-weight:400}
+.check figcaption{font-family:var(--mono);font-size:10px;color:var(--mute);letter-spacing:.04em;
+  line-height:1.6;margin-top:9px}
+
+/* update log */
+.updates{margin:36px 0 0;border:1px solid var(--rule);background:#fff}
+.updates h2{font-family:var(--mono);font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;
+  margin:0;padding:10px 14px;border-bottom:1px solid var(--rule-soft);border-top:none;padding-top:10px}
+.updates ol{list-style:none;margin:0;padding:0}
+.updates li{display:grid;grid-template-columns:96px 1fr;gap:12px;padding:12px 14px;
+  border-bottom:1px solid var(--rule-soft);font-size:15px;line-height:1.45}
+.updates li:last-child{border-bottom:none}
+.updates time{font-family:var(--mono);font-size:10px;letter-spacing:.05em;color:var(--mute);
+  text-transform:uppercase;padding-top:3px}
+.updates .tag{font-family:var(--mono);font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;
+  color:var(--signal);display:block;margin-bottom:3px}
+
+/* sourcing box */
+.sourcing{margin:30px 0 0;background:var(--ink);color:#DDE1E6;padding:22px}
+.sourcing h2{font-family:var(--sans);font-weight:700;font-size:16px;letter-spacing:.06em;
+  text-transform:uppercase;color:#fff;margin:0 0 6px;border:none;padding:0}
+.sourcing > p{margin:0 0 16px;font-size:15px;line-height:1.5;color:#A8B1BB;max-width:60ch}
+.sourcing ul{list-style:none;margin:0;padding:0;display:grid;gap:0}
+.sourcing li{display:grid;grid-template-columns:132px 1fr;gap:14px;padding:10px 0;
+  border-top:1px solid #2A313A;font-size:14px;line-height:1.45;color:#C3CAD2}
+.sourcing .kind{font-family:var(--mono);font-size:9.5px;letter-spacing:.09em;text-transform:uppercase;
+  color:#D08A93;padding-top:2px}
+.sourcing__foot{margin:16px 0 0;font-family:var(--mono);font-size:10px;letter-spacing:.06em;
+  text-transform:uppercase;color:#8B95A1}
+.sourcing__foot a{color:#D08A93}
+
+/* right rail */
+.aside{padding-left:26px;border-left:1px solid var(--rule-soft);position:sticky;top:26px}
+.aside__block{margin-bottom:26px}
+.aside__block h4{font-family:var(--sans);font-weight:700;font-size:13px;letter-spacing:.1em;
+  text-transform:uppercase;margin:0 0 10px;padding-bottom:7px;border-bottom:2px solid var(--ink)}
+.mini{list-style:none;margin:0;padding:0}
+.mini li{border-bottom:1px solid var(--rule-soft)}
+.mini a{display:block;padding:11px 0}
+.mini a:hover h5{color:var(--signal)}
+.mini h5{font-family:var(--sans);font-weight:600;font-size:14px;line-height:1.24;margin:0 0 5px;letter-spacing:-.008em}
+.mini .status{font-size:9.5px}
+.watch{list-style:none;margin:0;padding:0;font-size:14.5px;line-height:1.45}
+.watch li{display:flex;gap:9px;padding:9px 0;border-bottom:1px solid var(--rule-soft);color:#3B444E}
+.watch li::before{content:"";width:7px;height:7px;border:1.5px solid var(--rule);flex:none;margin-top:6px}
+.watch time{display:block;font-family:var(--mono);font-size:9.5px;letter-spacing:.06em;
+  text-transform:uppercase;color:var(--signal);margin-top:3px}
+.signup{border:1px solid var(--rule);padding:16px}
+.signup p{margin:0 0 12px;font-size:14.5px;line-height:1.45;color:#3B444E}
+.signup input{width:100%;font-family:var(--mono);font-size:12px;padding:9px 10px;
+  border:1px solid var(--rule);background:#fff;color:var(--ink);margin-bottom:7px}
+.signup button{width:100%;font-family:var(--mono);font-size:10px;letter-spacing:.11em;text-transform:uppercase;
+  padding:10px;background:var(--ink);color:#fff;border:none;cursor:pointer}
+.signup button:hover{background:var(--signal)}
+
+/* ---------- read next ---------- */
+.next{margin:44px var(--pad) 0}
+.next h2{font-family:var(--sans);font-weight:700;font-size:15px;letter-spacing:.1em;text-transform:uppercase;
+  margin:0;padding:10px 0;border-top:2px solid var(--ink);border-bottom:1px solid var(--rule)}
+.grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr))}
+.card{padding:20px 22px 22px 0;border-right:1px solid var(--rule-soft);border-bottom:1px solid var(--rule-soft)}
+.card:nth-child(3n){border-right:none;padding-right:0}
+.card:nth-child(3n+1){padding-left:0}
+.card:not(:nth-child(3n)):not(:nth-child(3n+1)){padding-left:22px}
+.card:hover h3{color:var(--signal)}
+.card__kicker{font-family:var(--mono);font-size:9.5px;letter-spacing:.13em;text-transform:uppercase;
+  color:var(--signal);margin-bottom:9px;display:block}
+.card h3{font-family:var(--sans);font-weight:700;font-size:18px;line-height:1.17;letter-spacing:-.015em;margin:0 0 8px}
+.card p{margin:0 0 12px;font-size:14.5px;line-height:1.45;color:#3B444E}
+
+.foot{margin:0 var(--pad);padding:24px 0 46px;display:flex;gap:20px;flex-wrap:wrap;
+  align-items:center;justify-content:space-between;
+  font-family:var(--mono);font-size:10px;letter-spacing:.07em;text-transform:uppercase;color:var(--mute)}
+.foot__links{display:flex;gap:18px;flex-wrap:wrap}
+.foot__links a:hover{color:var(--signal)}
+
+/* ---------- responsive ---------- */
+@media (max-width:1120px){
+  .piece{grid-template-columns:170px minmax(0,1fr)}
+  .aside{grid-column:1 / -1;border-left:none;padding-left:0;position:static;
+    border-top:1px solid var(--rule);margin-top:34px;padding-top:20px;
+    display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:26px}
+  .aside__block{margin-bottom:0}
+  .body{padding-right:0}
+}
+@media (max-width:820px){
+  .piece{grid-template-columns:1fr}
+  .rail{position:static;border-right:none;padding-right:0;border-bottom:1px solid var(--rule-soft);
+    padding-bottom:18px;margin-bottom:24px;display:grid;grid-template-columns:repeat(2,1fr);gap:18px}
+  .rail__block{margin-bottom:0}
+  .body{padding:0}
+  .grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .card:nth-child(3n){border-right:1px solid var(--rule-soft);padding-right:22px}
+  .card:nth-child(3n+1){padding-left:22px}
+  .card:nth-child(2n){border-right:none;padding-right:0}
+  .card:nth-child(2n+1){padding-left:0}
+}
+@media (max-width:640px){
+  body{font-size:16px}
+  .shell{border:none}
+  .body > p{font-size:17.5px}
+  .record__cols{grid-template-columns:1fr}
+  .record__col + .record__col{border-left:none;border-top:1px solid var(--rule-soft)}
+  .aside{grid-template-columns:1fr}
+  .grid{grid-template-columns:1fr}
+  .card{border-right:none!important;padding:18px 0!important}
+  .sourcing li,.updates li{grid-template-columns:1fr;gap:4px}
+  .topnav{display:none}
+  table.bench{font-size:11px}
+}
+@media (prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  .wirebar__run{animation:none}
+  .wirebar__track{overflow-x:auto}
+  .pulse{animation:none}
+}
+</style>
+</head>
+<body>
+<div class="shell">
+
+  <!-- wire -->
+  <div class="wirebar">
+    <div class="wirebar__tag"><span class="pulse"></span>On the wire</div>
+    <div class="wirebar__track">
+      <div class="wirebar__run" id="run">
+        <span class="wireitem"><b>09:41</b>Kestrel Labs pauses Meridian-3 API signups, cites capacity</span>
+        <span class="wireitem"><b>09:12</b>Second retest confirms 11-point gap on agentic coding suite</span>
+        <span class="wireitem"><b>08:55</b>Northgate files for 400MW grid connection in Ohio</span>
+        <span class="wireitem"><b>08:30</b>EU consultation on frontier disclosure closes Friday</span>
+        <span class="wireitem"><b>07:48</b>Halcyon researchers publish interpretability replication</span>
+      </div>
+    </div>
+    <div class="wirebar__clock" id="clock">--:--:-- UTC</div>
+  </div>
+
+  <!-- masthead -->
+  <div class="topbar">
+    <a class="wordmark" href="#">
+      <p class="wordmark__letters"><span>AI</span>NN</p>
+      <span class="wordmark__sub">AI News Network</span>
+    </a>
+    <nav class="topnav" aria-label="Sections">
+      <a href="#" aria-current="page">Models</a>
+      <a href="#">Research</a>
+      <a href="#">Policy</a>
+      <a href="#">Compute</a>
+      <a href="#">Business</a>
+      <a href="#">Safety</a>
+    </nav>
+    <div class="topbar__end">
+      <button class="btn-follow">Follow this story</button>
+    </div>
+  </div>
+
+  <div class="progress"><i id="bar"></i></div>
+
+  <!-- headline -->
+  <header class="head">
+    <div class="head__kicker">
+      <span class="head__section">Models</span>
+      <span class="status status--claim"><span class="mark mark--claim"></span>Company claim — partly verified</span>
+      <span class="status"><span class="mark mark--verified"></span>Our own testing: verified</span>
+    </div>
+    <h1>Kestrel says Meridian-3 runs a full workday unsupervised. We gave it eight hours.</h1>
+    <p class="head__dek">The lab's launch post describes an agent that completes multi-day engineering tasks without a human in the loop. In our own testing it held for just under four hours before it needed one.</p>
+    <div class="byline">
+      <span>By <b>Tessa Iwuoha</b> and <b>Daniel Reyes-Kim</b></span>
+      <span class="dot"></span><span>Published 06:40 UTC</span>
+      <span class="dot"></span><span><b>Updated 09:20 UTC</b></span>
+      <span class="dot"></span><span>9 min read</span>
+      <span class="dot"></span><a href="#sourcing">4 sources</a>
+      <span class="dot"></span><a href="#updates">3 updates</a>
+    </div>
+
+    <section class="record" aria-label="What we can and cannot confirm">
+      <div class="record__bar">
+        <h2>The record</h2>
+        <span>Last edited 09:20 UTC by A. Pereira, standards desk</span>
+      </div>
+      <div class="record__cols">
+        <div class="record__col">
+          <h3>Confirmed by AINN</h3>
+          <ul>
+            <li><span class="mark mark--verified"></span><div>Meridian-3 is live for enterprise customers as of 06:00 UTC today.<cite>Verified — API access, two customers</cite></div></li>
+            <li><span class="mark mark--verified"></span><div>Pricing is $9 per million input tokens, up 40% on Meridian-2.<cite>Verified — published rate card</cite></div></li>
+            <li><span class="mark mark--verified"></span><div>The model ran 3h 51m on our internal migration task before failing.<cite>Verified — AINN test, method published</cite></div></li>
+          </ul>
+        </div>
+        <div class="record__col">
+          <h3>Claimed, not yet verified</h3>
+          <ul>
+            <li><span class="mark mark--claim"></span><div>"Full workday" autonomy of 8+ hours on real engineering work.<cite>Kestrel launch post — no method given</cite></div></li>
+            <li><span class="mark mark--claim"></span><div>A 71.4% score on the agentic coding suite.<cite>Lab self-reported — see retest below</cite></div></li>
+            <li><span class="mark mark--unconfirmed"></span><div>Training finished in March on a new Northgate cluster.<cite>Single anonymous source — unconfirmed</cite></div></li>
+          </ul>
+        </div>
+      </div>
+    </section>
+  </header>
+
+  <!-- body -->
+  <div class="piece">
+
+    <!-- left rail -->
+    <div class="rail">
+      <div class="rail__block">
+        <h4>Story status</h4>
+        <div class="status status--claim" style="margin-bottom:6px"><span class="mark mark--claim"></span>Partly verified</div>
+        <div class="rail__sub">Editor: A. Pereira<br>Re-reviewed 09:20 UTC</div>
+      </div>
+      <div class="rail__block">
+        <h4>Testing</h4>
+        <div class="rail__val">10 passes<br>4 benchmarks</div>
+        <div class="rail__sub">Logs published in full</div>
+      </div>
+      <div class="rail__block">
+        <h4>Corrections</h4>
+        <div class="rail__val">None</div>
+        <div class="rail__sub">Any correction appears here permanently</div>
+      </div>
+      <div class="rail__block">
+        <h4>Do more</h4>
+        <div class="rail__actions">
+          <a href="#updates">Jump to updates</a>
+          <a href="#sourcing">See our sources</a>
+          <a href="#">Reproduce our test</a>
+          <a href="#">Tell us we're wrong</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- article -->
+    <article class="body">
+      <p>Kestrel Labs opened access to Meridian-3 at six o'clock this morning with a launch post claiming the model can work through <strong>a full engineering workday without supervision</strong> — eight hours or more of planning, writing and fixing code with no human touching the loop. We started testing at 06:12. The model stopped needing nothing from us at 10:03.</p>
+
+      <p>That is three hours and fifty-one minutes of genuinely unattended work, which by any reasonable standard is a large jump on anything we tested six months ago. It is also less than half of what the launch post advertises, and the difference comes down almost entirely to how you count a stall.</p>
+
+      <h2>What the eight-hour number is measuring</h2>
+
+      <p>Kestrel's figure comes from an internal evaluation the lab describes in two sentences and has not published.<span class="claimtag"><span class="mark mark--claim"></span>Claim</span> After we asked, a spokesperson confirmed that runs in which an operator restarted a stalled step were counted as continuous, on the grounds that the restart adds no information the model did not already have.</p>
+
+      <p>That is a defensible engineering choice and an indefensible one to put in a headline. On our migration task, Meridian-3 stalled four times before the run ended. Each stall was a loop: the model re-read the same failing test, proposed the same fix, and watched it fail again. A restart broke the loop every time. Under Kestrel's counting method, our run also lasted more than eight hours.</p>
+
+      <blockquote>
+        <p>If a human has to notice it's stuck and press a button, it is not unsupervised. That's the whole thing we're measuring.</p>
+        <footer>— Priya Raghunathan, evaluations lead at Halcyon Research, who was not involved in the launch</footer>
+      </blockquote>
+
+      <p>Kestrel declined to make a researcher available and did not answer our question about how many restarts a typical eight-hour run required. We will update this piece if that changes.</p>
+
+      <h2>The benchmarks, rerun</h2>
+
+      <p>We ran the four public suites Kestrel cited, on the production API, ten passes each, using the lab's own harness and no additional scaffolding. Two of the four numbers held. Two did not.</p>
+
+      <figure class="check">
+        <div class="check__head">
+          <h3>Claim check: Meridian-3 agentic benchmarks</h3>
+          <span>Tested 26–27 Aug · 10 passes each</span>
+        </div>
+        <table class="bench">
+          <thead>
+            <tr><th>Benchmark</th><th class="num">Kestrel</th><th class="num">AINN retest</th><th class="delta">Δ</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Agentic coding suite</td><td class="num">71.4%</td><td class="num">60.2%</td><td class="delta">−11.2</td></tr>
+            <tr><td>Long-horizon completion</td><td class="num">8h 06m</td><td class="num">3h 51m</td><td class="delta">−52%</td></tr>
+            <tr><td>Tool-use accuracy</td><td class="num">94.1%</td><td class="num">93.6%</td><td class="delta ok">−0.5</td></tr>
+            <tr><td>Context retrieval @ 1M</td><td class="num">99.2%</td><td class="num">98.8%</td><td class="delta ok">−0.4</td></tr>
+          </tbody>
+        </table>
+        <figcaption>The coding gap closes to −3.1 points with the lab's retry-on-failure setting enabled, which ships off by default. Tool use and retrieval are within run-to-run variance; those two claims hold. <a class="link" href="#">Full method and raw logs →</a></figcaption>
+      </figure>
+
+      <p>The eleven-point gap on the coding suite is the one worth arguing about. Turn on retry-on-failure — a setting that silently re-runs a failed step up to three times — and Meridian-3 lands within three points of the published figure. Kestrel's number is achievable. It is just not the number you get when you install the thing and use it.</p>
+
+      <h2>Who this actually changes something for</h2>
+
+      <p>For teams already running agents in production, four unattended hours is a real threshold: it covers a full overnight window in most timezones and it is long enough for a migration to either finish or fail informatively. Two of the enterprise customers we spoke to said they had moved workloads across this morning and would decide by next week.</p>
+
+      <p>For everyone else the more consequential number is the price. At $9 per million input tokens, Meridian-3 costs 40% more than the model it replaces, in a market where the direction of travel for eighteen months has been down. Kestrel is betting that autonomy is worth a premium. By late morning it had <a class="link" href="#">paused new signups</a>, which suggests the bet is at least being taken.</p>
+
+      <p>What we still cannot tell you is where the model was trained or when. One person familiar with the arrangement told us the run finished in March on a new Northgate cluster.<span class="claimtag"><span class="mark mark--unconfirmed"></span>Unconfirmed</span> We have not been able to confirm that with a second source and Northgate declined to comment, so we are marking it as unsettled rather than reporting it.</p>
+
+      <!-- updates -->
+      <section class="updates" id="updates">
+        <h2>Update log</h2>
+        <ol>
+          <li>
+            <time>09:20 UTC</time>
+            <div><span class="tag">Status changed</span>Moved from Company claim to Company claim — partly verified after our retest of all four benchmarks completed. Two claims now marked verified.</div>
+          </li>
+          <li>
+            <time>08:15 UTC</time>
+            <div><span class="tag">New material</span>Added Kestrel's response on restart counting, and Priya Raghunathan's comment.</div>
+          </li>
+          <li>
+            <time>06:40 UTC</time>
+            <div><span class="tag">Published</span>First version, based on the launch post and confirmed API access.</div>
+          </li>
+        </ol>
+      </section>
+
+      <!-- sourcing -->
+      <section class="sourcing" id="sourcing">
+        <h2>How we reported this</h2>
+        <p>We test claims before we print them. Where we could not test, we say who told us and how much weight to put on it.</p>
+        <ul>
+          <li><span class="kind">Our own testing</span><span>Ten passes on four public benchmarks via the production API, 26–27 August. Harness, prompts and raw logs are published.</span></li>
+          <li><span class="kind">On the record</span><span>Priya Raghunathan, evaluations lead, Halcyon Research. No commercial relationship with Kestrel disclosed.</span></li>
+          <li><span class="kind">Company statement</span><span>Kestrel Labs communications, by email. Declined to make a researcher available or to give restart counts.</span></li>
+          <li><span class="kind">Anonymous, single</span><span>One person familiar with Kestrel's training arrangements. Not confirmed by a second source, so the training-timeline detail is marked unconfirmed.</span></li>
+        </ul>
+        <p class="sourcing__foot">AINN takes no funding from AI labs · <a href="#">Our testing method</a> · <a href="#">Corrections policy</a></p>
+      </section>
+    </article>
+
+    <!-- right rail -->
+    <aside class="aside">
+      <div class="aside__block">
+        <h4>This story so far</h4>
+        <ul class="mini">
+          <li><a href="#"><h5>Kestrel pauses new Meridian-3 signups four hours after launch</h5><span class="status"><span class="mark mark--verified"></span>Verified · 09:41</span></a></li>
+          <li><a href="#"><h5>Two Kestrel safety staff said to have left before launch</h5><span class="status"><span class="mark mark--unconfirmed"></span>Unconfirmed · 06:15</span></a></li>
+          <li><a href="#"><h5>What Meridian-2 promised, and what it delivered</h5><span class="status"><span class="mark mark--verified"></span>Verified · March</span></a></li>
+        </ul>
+      </div>
+
+      <div class="aside__block">
+        <h4>What to watch</h4>
+        <ul class="watch">
+          <li><div>Kestrel's model card, promised "within days"<time>Not yet published</time></div></li>
+          <li><div>Independent replication from two other evaluation groups<time>Expected this week</time></div></li>
+          <li><div>Whether signups reopen, and at what price<time>Open question</time></div></li>
+        </ul>
+      </div>
+
+      <div class="aside__block">
+        <h4>The daily wire</h4>
+        <div class="signup">
+          <p>One email each morning: what happened, and what we could actually verify.</p>
+          <input type="email" placeholder="you@work.com" aria-label="Email address">
+          <button>Get the wire</button>
+        </div>
+      </div>
+    </aside>
+  </div>
+
+  <!-- read next -->
+  <section class="next">
+    <h2>Read next</h2>
+    <div class="grid">
+      <a class="card" href="#">
+        <span class="card__kicker">Research</span>
+        <h3>Why every lab's eval numbers went up at once</h3>
+        <p>Four benchmarks were revised in June. The revisions are defensible; comparing pre- and post-June scores is not.</p>
+        <span class="status"><span class="mark mark--verified"></span>Verified · 10 min</span>
+      </a>
+      <a class="card" href="#">
+        <span class="card__kicker">Compute</span>
+        <h3>The quiet economics of a datacentre that can't get power</h3>
+        <p>Northgate's Ohio site has racks, cooling and no grid connection until 2029.</p>
+        <span class="status"><span class="mark mark--verified"></span>Verified · 11 min</span>
+      </a>
+      <a class="card" href="#">
+        <span class="card__kicker">Business</span>
+        <h3>Enterprise buyers are quietly renegotiating their 2025 contracts</h3>
+        <p>Falling inference prices left large customers locked into rates 3× the market.</p>
+        <span class="status"><span class="mark mark--reported"></span>Reported · 9 min</span>
+      </a>
+    </div>
+  </section>
+
+  <footer class="foot">
+    <div>© 2026 AI News Network · Independent · No lab funding</div>
+    <div class="foot__links">
+      <a href="#">Newsletter</a><a href="#">RSS</a><a href="#">Corrections</a>
+      <a href="#">Contact a reporter securely</a><a href="#">Standards</a>
+    </div>
+  </footer>
+</div>
+
+<script>
+(function(){
+  var el=document.getElementById('clock');
+  function p(n){return String(n).padStart(2,'0');}
+  function tick(){var d=new Date();el.textContent=p(d.getUTCHours())+':'+p(d.getUTCMinutes())+':'+p(d.getUTCSeconds())+' UTC';}
+  tick();setInterval(tick,1000);
+})();
+(function(){var r=document.getElementById('run');r.innerHTML+=r.innerHTML;})();
+(function(){
+  var bar=document.getElementById('bar');
+  function upd(){
+    var h=document.documentElement;
+    var max=h.scrollHeight-h.clientHeight;
+    bar.style.width=(max>0?(h.scrollTop/max)*100:0)+'%';
+  }
+  upd();addEventListener('scroll',upd,{passive:true});addEventListener('resize',upd);
+})();
+</script>
+</body>
+</html>
