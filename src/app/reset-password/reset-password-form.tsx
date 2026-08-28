@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { authClient } from "@/lib/auth-client";
 
 export function ResetPasswordForm({ token }: { token: string }) {
   const router = useRouter();
@@ -22,7 +21,11 @@ export function ResetPasswordForm({ token }: { token: string }) {
 
     setLoading(true);
     try {
-      await authClient.resetPassword({ newPassword: password, token });
+      await fetch("/api/auth/reset-password", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ newPassword: password, token }),
+      });
       router.push("/login");
     } catch {
       setError("Something went wrong. The link may have expired.");

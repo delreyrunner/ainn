@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { authClient } from "@/lib/auth-client";
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState("");
@@ -16,7 +15,11 @@ export default function ForgotPasswordPage() {
     setLoading(true);
 
     try {
-      await authClient.forgotPassword({ email, redirectTo: "/reset-password" });
+      await fetch("/api/auth/forget-password", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, redirectTo: "/reset-password" }),
+      });
       setSent(true);
     } catch {
       setError("Something went wrong. Please try again.");
