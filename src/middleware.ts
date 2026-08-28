@@ -35,10 +35,6 @@ export async function middleware(request: NextRequest) {
 
   // The homepage and news pages are always public
   if (isPublicRoute || pathname === "/") {
-    // Redirect logged-in users away from auth pages to admin
-    if (sessionCookie && (pathname === "/login" || pathname === "/signup")) {
-      return NextResponse.redirect(new URL("/admin", request.url));
-    }
     return NextResponse.next();
   }
 
