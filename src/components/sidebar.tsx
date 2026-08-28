@@ -10,6 +10,7 @@ import {
   FileText,
   Radar,
   Users,
+  UserCog,
   LogOut,
   User,
   ChevronUp,
@@ -31,6 +32,8 @@ const navItems: NavItem[] = [
   { href: "/admin/articles", icon: FileText, label: "Articles", roles: ["admin", "editor"] },
   { href: "/admin/monitoring", icon: Radar, label: "Radar", roles: ["admin", "editor"] },
   { href: "/admin/subscribers", icon: Users, label: "Subscribers", roles: ["admin"] },
+  { href: "/admin/team", icon: UserCog, label: "Team", roles: ["admin"] },
+  { href: "/profile", icon: User, label: "Profile", roles: ["admin", "editor", "reader"] },
 ];
 
 export function Sidebar() {
