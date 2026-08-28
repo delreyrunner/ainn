@@ -19,7 +19,7 @@ async function sendResendEmail(to: string, subject: string, html: string) {
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      from: "AINN <noreply@ainn.news>",
+      from: "AINN <noreply@ainewsnet.com>",
       to: [to],
       subject,
       html,
@@ -41,6 +41,7 @@ export const auth = betterAuth({
   trustedOrigins: [
     "http://localhost:3000",
     "http://localhost:3001",
+    "https://ainewsnet.com",
   ],
   database: pool,
   emailAndPassword: {
