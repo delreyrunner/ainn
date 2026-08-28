@@ -13,6 +13,7 @@
   },
   "dependencies": {
     "@neondatabase/serverless": "^0.10.0",
+    "@resvg/resvg-js": "^2.6.2",
     "@types/pg": "^8.20.0",
     "better-auth": "^1.6.23",
     "drizzle-orm": "^0.45.2",
@@ -22,6 +23,7 @@
     "postgres": "^3.4.9",
     "react": "19.2.4",
     "react-dom": "19.2.4",
+    "satori": "^0.33.4",
     "stripe": "^17.0.0"
   },
   "devDependencies": {

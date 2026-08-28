@@ -20,6 +20,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   if (!article || article.status !== "live") return {};
 
   const url = `${process.env.NEXT_PUBLIC_APP_URL || "https://ainewsnet.com"}/news/${slug}`;
+  const ogImage = `${process.env.NEXT_PUBLIC_APP_URL || "https://ainewsnet.com"}/api/og/${slug}.png`;
 
   return {
     title: article.headline,
@@ -29,6 +30,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       description: article.dek || undefined,
       type: "article",
       url,
+      images: [{ url: ogImage, width: 1200, height: 630 }],
       publishedTime: article.datePublished?.toISOString(),
       modifiedTime: article.dateModified?.toISOString(),
       section: article.section,
@@ -37,6 +39,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       card: "summary_large_image",
       title: article.headline,
       description: article.dek || undefined,
+      images: [ogImage],
     },
     alternates: { canonical: url },
   };
