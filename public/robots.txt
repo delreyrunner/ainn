@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://ainewsnet.com/api/sitemap/news.xml
+Sitemap: https://ainewsnet.com/api/sitemap/index.xml
