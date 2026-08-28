@@ -1,13 +1,25 @@
 import type { Metadata } from "next";
 import "./globals.css";
 
+function getMetadataBase(): URL {
+  const url = process.env.NEXT_PUBLIC_APP_URL;
+  if (url) {
+    try {
+      return new URL(url.startsWith("http") ? url : `https://${url}`);
+    } catch {
+      // fall through
+    }
+  }
+  return new URL("http://localhost:3000");
+}
+
 export const metadata: Metadata = {
   title: {
     default: "AINN — AI News Network",
     template: "%s — AINN",
   },
   description: "Verified AI news and independent benchmarks. Every claim checked, every benchmark independently tested.",
-  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"),
+  metadataBase: getMetadataBase(),
   openGraph: {
     type: "website",
     siteName: "AINN",
