@@ -1,13 +1,13 @@
 import { db } from "@/db";
 import { articles } from "@/db/schema";
 import { desc } from "drizzle-orm";
-import { getCurrentUser } from "@/lib/get-current-user";
+import { getCurrentUser, canEditArticles } from "@/lib/get-current-user";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 
 export default async function AdminArticlesPage() {
   const user = await getCurrentUser();
-  if (!user || (user.role !== "admin" && user.role !== "editor")) {
+  if (!user || !canEditArticles(user.role)) {
     redirect("/");
   }
 

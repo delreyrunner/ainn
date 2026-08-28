@@ -1,10 +1,10 @@
 import { db } from "@/db";
 import { sql } from "drizzle-orm";
-import { getCurrentUser } from "@/lib/get-current-user";
+import { getCurrentUser, canManageTeam } from "@/lib/get-current-user";
 
 export async function GET() {
   const user = await getCurrentUser();
-  if (!user || user.role !== "admin") {
+  if (!user || !canManageTeam(user.role)) {
     return Response.json({ error: "Unauthorized" }, { status: 401 });
   }
 

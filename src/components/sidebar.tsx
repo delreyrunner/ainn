@@ -18,7 +18,7 @@ import {
   PanelLeftOpen,
 } from "lucide-react";
 
-type UserRole = "admin" | "editor" | "reader";
+type UserRole = "super_admin" | "admin" | "team_member" | "subscriber";
 
 interface NavItem {
   href: string;
@@ -28,12 +28,12 @@ interface NavItem {
 }
 
 const navItems: NavItem[] = [
-  { href: "/admin", icon: LayoutDashboard, label: "Dashboard", roles: ["admin", "editor"] },
-  { href: "/admin/articles", icon: FileText, label: "Articles", roles: ["admin", "editor"] },
-  { href: "/admin/monitoring", icon: Radar, label: "Radar", roles: ["admin", "editor"] },
-  { href: "/admin/subscribers", icon: Users, label: "Subscribers", roles: ["admin"] },
-  { href: "/admin/team", icon: UserCog, label: "Team", roles: ["admin"] },
-  { href: "/profile", icon: User, label: "Profile", roles: ["admin", "editor", "reader"] },
+  { href: "/admin", icon: LayoutDashboard, label: "Dashboard", roles: ["super_admin", "admin", "team_member"] },
+  { href: "/admin/articles", icon: FileText, label: "Articles", roles: ["super_admin", "admin", "team_member"] },
+  { href: "/admin/monitoring", icon: Radar, label: "Radar", roles: ["super_admin", "admin", "team_member"] },
+  { href: "/admin/subscribers", icon: Users, label: "Subscribers", roles: ["super_admin", "admin"] },
+  { href: "/admin/team", icon: UserCog, label: "Team", roles: ["super_admin"] },
+  { href: "/profile", icon: User, label: "Profile", roles: ["super_admin", "admin", "team_member", "subscriber"] },
 ];
 
 export function Sidebar() {

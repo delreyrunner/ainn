@@ -97,7 +97,7 @@ export const auth = betterAuth({
 
             const role = inviteResult.rows.length > 0 
               ? inviteResult.rows[0].role 
-              : "admin"; // Default to admin for now (first users are admins)
+              : "subscriber"; // Default for uninvited signups (public readers)
 
             await pool.query(
               `UPDATE "user" SET role = $1 WHERE id = $2`,

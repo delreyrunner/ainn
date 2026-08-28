@@ -1,10 +1,10 @@
-import { getCurrentUser } from "@/lib/get-current-user";
+import { getCurrentUser, canAccessAdmin } from "@/lib/get-current-user";
 import { redirect } from "next/navigation";
 
 export default async function AdminDashboard() {
   const user = await getCurrentUser();
 
-  if (!user || (user.role !== "admin" && user.role !== "editor")) {
+  if (!user || !canAccessAdmin(user.role)) {
     redirect("/");
   }
 

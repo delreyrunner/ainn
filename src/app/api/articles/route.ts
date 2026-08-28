@@ -1,6 +1,6 @@
 import { db } from "@/db";
 import { articles } from "@/db/schema";
-import { getCurrentUser } from "@/lib/get-current-user";
+import { getCurrentUser, canEditArticles } from "@/lib/get-current-user";
 
 function slugify(text: string): string {
   return text
@@ -13,7 +13,7 @@ function slugify(text: string): string {
 export async function POST(request: Request) {
   const user = await getCurrentUser();
 
-  if (!user || (user.role !== "admin" && user.role !== "editor")) {
+  if (!user || !canEditArticles(user.role)) {
     return Response.json({ error: "Unauthorized" }, { status: 401 });
   }
 

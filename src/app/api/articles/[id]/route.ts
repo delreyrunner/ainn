@@ -1,12 +1,12 @@
 import { db } from "@/db";
 import { articles } from "@/db/schema";
 import { eq } from "drizzle-orm";
-import { getCurrentUser } from "@/lib/get-current-user";
+import { getCurrentUser, canEditArticles } from "@/lib/get-current-user";
 
 export async function PATCH(request: Request, { params }: { params: Promise<{ id: string }> }) {
   const user = await getCurrentUser();
 
-  if (!user || (user.role !== "admin" && user.role !== "editor")) {
+  if (!user || !canEditArticles(user.role)) {
     return Response.json({ error: "Unauthorized" }, { status: 401 });
   }
 

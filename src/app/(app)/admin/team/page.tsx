@@ -6,9 +6,10 @@ import { Loader2, Plus, Trash2 } from "lucide-react";
 interface User { id: string; name: string; email: string; role: string; }
 
 const ROLES = [
+  { value: "super_admin", label: "Super Admin" },
   { value: "admin", label: "Admin" },
-  { value: "editor", label: "Editor" },
-  { value: "reader", label: "Reader" },
+  { value: "team_member", label: "Team Member" },
+  { value: "subscriber", label: "Subscriber" },
 ];
 
 type Tab = "members" | "invite";
@@ -20,7 +21,7 @@ export default function AdminTeamPage() {
 
   // Invite form
   const [inviteEmail, setInviteEmail] = useState("");
-  const [inviteRole, setInviteRole] = useState("editor");
+  const [inviteRole, setInviteRole] = useState("team_member");
   const [sending, setSending] = useState(false);
   const [sent, setSent] = useState(false);
 
@@ -142,9 +143,9 @@ export default function AdminTeamPage() {
                 onChange={e => setInviteRole(e.target.value)}
                 style={{ fontFamily: "var(--mono)", fontSize: 13, padding: "10px 12px", border: "1px solid var(--rule)", background: "#fff", color: "var(--ink)" }}
               >
-                <option value="editor">Editor</option>
+                <option value="team_member">Team Member</option>
                 <option value="admin">Admin</option>
-                <option value="reader">Reader</option>
+                <option value="subscriber">Subscriber</option>
               </select>
             </div>
             <button

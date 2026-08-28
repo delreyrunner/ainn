@@ -1,10 +1,10 @@
 import { db } from "@/db";
 import { invites } from "@/db/schema";
-import { getCurrentUser } from "@/lib/get-current-user";
+import { getCurrentUser, canManageTeam } from "@/lib/get-current-user";
 
 export async function POST(request: Request) {
   const user = await getCurrentUser();
-  if (!user || user.role !== "admin") {
+  if (!user || !canManageTeam(user.role)) {
     return Response.json({ error: "Unauthorized" }, { status: 401 });
   }
 
@@ -14,7 +14,7 @@ export async function POST(request: Request) {
     return Response.json({ error: "Email required" }, { status: 400 });
   }
 
-  if (!["admin", "editor", "reader"].includes(role)) {
+  if (!["super_admin", "admin", "team_member", "subscriber"].includes(role)) {
     return Response.json({ error: "Invalid role" }, { status: 400 });
   }
 
