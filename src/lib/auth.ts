@@ -46,7 +46,7 @@ export const auth = betterAuth({
   database: pool,
   emailAndPassword: {
     enabled: true,
-    requireEmailVerification: true,
+    requireEmailVerification: false,
     sendResetPassword: async ({ user, url }) => {
       await sendResendEmail(
         user.email,
@@ -63,7 +63,7 @@ export const auth = betterAuth({
     },
   },
   emailVerification: {
-    sendOnSignUp: true,
+    sendOnSignUp: false,
     autoSignInAfterVerification: true,
     sendVerificationEmail: async ({ user, url }) => {
       await sendResendEmail(
@@ -88,34 +88,30 @@ export const auth = betterAuth({
     user: {
       create: {
         after: async (user) => {
-          // Check invites table for a matching role assignment
           try {
+            // Check invites table for a matching role assignment
             const inviteResult = await pool.query(
               `SELECT role FROM invites WHERE email = $1 LIMIT 1`,
               [user.email]
             );
 
+            const role = inviteResult.rows.length > 0 
+              ? inviteResult.rows[0].role 
+              : "admin"; // Default to admin for now (first users are admins)
+
+            await pool.query(
+              `UPDATE "user" SET role = $1 WHERE id = $2`,
+              [role, user.id]
+            );
+
             if (inviteResult.rows.length > 0) {
-              const invitedRole = inviteResult.rows[0].role;
-              await pool.query(
-                `UPDATE "user" SET role = $1 WHERE id = $2`,
-                [invitedRole, user.id]
-              );
-              await pool.query(
-                `DELETE FROM invites WHERE email = $1`,
-                [user.email]
-              );
-              console.log("[auth-hook] Applied invited role:", invitedRole, "for:", user.email);
-            } else {
-              // Default role for uninvited signups (readers who create accounts)
-              await pool.query(
-                `UPDATE "user" SET role = $1 WHERE id = $2`,
-                ["reader", user.id]
-              );
-              console.log("[auth-hook] Applied default role: reader for:", user.email);
+              await pool.query(`DELETE FROM invites WHERE email = $1`, [user.email]);
             }
+
+            console.log("[auth-hook] Applied role:", role, "for:", user.email);
           } catch (e) {
             console.error("[auth-hook] Failed to set user role:", e);
+            // Don't throw — let signup succeed even if role assignment fails
           }
         },
       },
